@@ -1,0 +1,48 @@
+.center01 {
+    margin: auto;
+    width: 50%;
+}
+
+.fondo01 {
+    background-color: aquamarine;
+}
+
+.bloque01 {
+    width: 10rem;
+
+    position: fixed;
+    left:3rem;
+    top:3rem;
+
+    border-radius: 2;
+
+    background-color: #fff;
+}
+
+.dg .c .slider {
+    background: #886CD4;
+    cursor: ew-resize;
+    color: #89E2A0;
+}
+elemento {
+
+    user-select: none;
+    width: 245px;
+
+}
+
+
+.dg.a {
+
+    margin-right: 15px;
+    overflow-x: hidden;
+    position: fixed;
+    bottom: 50px;
+    right: 1000px;
+    width: 6rem;
+
+}
+
+.c {
+    width: 70%;
+}

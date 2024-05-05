@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+	<head></head>
+	<body>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+	<script src="javascript/loaders/PLYLoader.js"></script>
+
+<div class="card" style="width: 10rem; position: fixed; left:3rem; top:3rem; background-color: #fff;">
+	<p class="card-text"><b>p</b>pausar <b>   y</b> <b>Y</b> rotar.</p>
+	<p class="card-text"><b>f</b> <b>F</b> z far</p>
+    <input type="range" id="z_far" name="volume" min="0" max="20" value="20">
+</div>
+
+<script id="fragment_shader" type="x-shader/x-fragment">
+varying vec3 vpos;
+uniform float z_far;
+
+void main(void)
+{
+    float len = sqrt(pow(vpos.x,2.0)+pow(vpos.y,2.0)+pow(vpos.z,2.0));
+    float depth = len/z_far;
+    gl_FragColor = vec4(depth,depth,depth,1.0);
+}
+
+</script>
+
+<script id="vertex_shader" type="x-shader/x-vertex">
+varying vec3 LightDir[2];
+varying vec3 vnormal;
+varying vec3 vpos;
+varying mat4 mvMatrix;
+
+void main()
+{
+	mvMatrix = modelViewMatrix;
+
+	// vertex normal
+	vnormal = normalize(normalMatrix * normal);
+	
+	// vertex position
+	vpos = vec3(modelViewMatrix * vec4(position, 1.0));
+	
+	// vertex position
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+
+</script>
+
+<script>
+			var container;
+			var camera, cameraTarget, scene, renderer;
+			var mesh;
+			var material, uniforms;
+			const clock = new THREE.Clock();
+			var rotationSpeed = 0;
+			var camaraSpeed = 0;
+			var z_position_speed = 0;
+            let geometry;
+
+            // PLY file
+				const loader = new THREE.PLYLoader();
+				loader.addEventListener( 'load', function ( event ) {
+					geometry = event.content;
+					material = new THREE.ShaderMaterial( {
+						uniforms: uniforms,
+						vertexShader: document.getElementById( 'vertex_shader' ).textContent,
+						fragmentShader: document.getElementById( 'fragment_shader' ).textContent
+					} );
+
+					// (async function geo(){geometry.computeFaceNormals();}());
+					// (async function vec(){geometry.computeVertexNormals();}());
+					geometry.computeFaceNormals();
+					geometry.computeVertexNormals();
+
+					mesh = new THREE.Mesh( geometry, material );
+					// mesh.position.set( 0, -0.7, 0 );
+					mesh.position.set( 0, 0, 0 );
+					mesh.rotation.set( -2, -0.4, 1 );
+					// mesh.scale.set( 7, 7, 7 );
+					mesh.scale.set( 0.01, 0.01, 0.01 );
+
+					// mesh.castShadow = true;
+					// mesh.receiveShadow = true;
+
+					scene.add( mesh );
+    
+                    // console.log("loader event"); 
+                    animate();
+                    
+				} );
+            
+
+                window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener("keydown",function(event){
+            switch (event.key) {
+                case "ArrowRight": positionSpeed -= 0.1; break;
+                case "ArrowLeft": positionSpeed += 0.1; break;
+                case "p":
+                case "P":
+                rotationSpeed = 0; 
+                positionSpeed =0;
+                camaraSpeed = 0;
+                z_position_speed = 0;
+                break;
+                case "y": rotationSpeed += 0.1; break;
+                case "Y": rotationSpeed -= 0.1; break;
+                case "c": camaraSpeed += 0.1; break;
+                case "C": camaraSpeed -= 0.1; break;
+                case "z": z_position_speed += 0.1;break;
+                case "Z": z_position_speed -= 0.1; break;
+                case "f": uniforms.z_far.value += 1; break;
+                case "F": uniforms.z_far.value -= 1; break;
+                default: break;
+            }
+
+            });
+
+			draw_scene();
+
+
+			function draw_scene() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 15 );
+				camera.position.set( 3, 1, 3 );
+				cameraTarget = new THREE.Vector3( 0, -0.25, 0 );
+				scene = new THREE.Scene();
+				// scene.fog = new THREE.Fog( 0x72645b, 2, 30 );
+
+				//shader uniforms
+				uniforms = {z_far: {type: "f", value:20.0}};
+
+				// renderer
+				renderer = new THREE.WebGLRenderer( );
+				renderer.setClearColor( 0x8DA6F5 );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				container.appendChild( renderer.domElement );
+
+				//input change
+				document.getElementById("z_far").addEventListener("change", (event) => {
+                    console.log(event.target.value); 
+                    uniforms.z_far.value = parseInt(event.target.value)+0.0;
+                });
+				
+                // console.log("loader load"); 
+                // loader.load( './modelos/dragon100k.ply' );
+                loader.load( './modelos/Garuda and Vishnu.ply' );
+                // console.log("end loader load"); 
+                
+
+				
+			}
+
+			
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+			function animate() {
+                    requestAnimationFrame( animate );
+                    render();
+			}
+			function render() {
+				var delta = clock.getDelta();
+				mesh.rotation.y += -delta * rotationSpeed;
+				camera.lookAt( cameraTarget );
+				renderer.render( scene, camera );
+			}
+
+		</script>
+		<link rel="stylesheet" href="./style.css" type="text/css">
+	</body>
+</html>

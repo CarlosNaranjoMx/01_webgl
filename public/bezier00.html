@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+
+      .bloque01 {
+        width: 10rem;
+        position: fixed;
+        left:3rem;
+        top:3rem;
+        background-color: #fff;
+      }
+
+      .center01 {
+        margin: auto;
+        width: 100%;
+        color: #fff;
+        background-color: rgb(57, 60, 219);
+      }
+      
+      .radius01 {
+        border-radius: 1em;
+      }
+
+      .inline01 {
+        width: 2em;
+        display: inline;
+      }
+
+		</style>
+    <!-- <link rel="stylesheet" href="css/style.css"> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script> -->
+	</head>
+
+
+	<body>
+
+    <div class="bloque01 radius01" >
+      <p class="card-text"><b>p</b>pausar <b>   y</b> <b>Y</b> rotar.</p>
+      <p class="card-text"><b>f</b> <b>F</b> z far</p>
+        <input type="range" id="z_far" name="volume" value="20" list="tickmarks">
+        <datalist id="tickmarks">
+          <option value="0" label="0%">
+          <option value="10">
+          <option value="20">
+          <option value="30">
+          <option value="40">
+          <option value="50" label="50%">
+          <option value="60">
+          <option value="70">
+          <option value="80">
+          <option value="90">
+          <option value="100" label="100%">
+        </datalist>
+        <button class="radius01 center01">GO</button>
+    </div>
+
+    <script src="javascript/three.js"></script>
+		<script>
+
+			const renderer = new THREE.WebGLRenderer();
+      renderer.setSize( window.innerWidth, window.innerHeight );
+
+      var vector01 = {x: -10, y:0, z:0}
+      document.getElementById("z_far").addEventListener("change", (event) => {
+                    console.log(event.target.value); 
+                    vector01.x = parseInt(event.target.value)+0.0;
+      });
+
+      // agregar hijo
+      document.body.appendChild( renderer.domElement );
+
+
+      const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
+      camera.position.set( 0, 0, 100 );
+      camera.lookAt( 0, 0, 0 );
+      const scene = new THREE.Scene();
+
+      //create a blue LineBasicMaterial
+      var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+
+      var line;
+      var points;
+
+      //La prueba del vector
+      // var vector01 = new THREE.Vector3(0,1,1);
+      // vector01.addScaledVector(vector01,2.0);
+      // console.log(vector01.y)
+      //Formula no cuadratica
+      //B(t)=P0+(P1-P0)t=(1-t)P0+tP1, t e [0,1]
+      //Formula cuadratica de las curvas de bezier
+      //
+
+      const material01 = new THREE.LineBasicMaterial({
+        color: 0x0000ff
+      });
+
+      const points01 = [];
+      let punto01 = new THREE.Vector3( - 10, 0, 0 );
+      punto01.name = "P0"
+      points01.push( punto01 );
+      points01.push( new THREE.Vector3( 0, 10, 0 ) );
+      points01.push( new THREE.Vector3( 10, 0, 0 ) );
+
+      const geometry01 = new THREE.BufferGeometry().setFromPoints( points01 );
+
+      const line01 = new THREE.Line( geometry01, material01 );
+      scene.add( line01 );
+
+
+      points = [];
+      var p0 = new THREE.Vector3( 20, 0, 0 );
+      var p1 = new THREE.Vector3( 0, 0, 0 );
+      var p2 = new THREE.Vector3( 0, 20, 0 );
+
+      // function B(t,p0,p1) {
+      //   var tmp00 = (new THREE.Vector3()).addScaledVector(p0,t);
+      //   var tmp01 = (new THREE.Vecotor3()).addVectors(p0,tmp00);
+      //   var tmp02 = (new THREE.Vector3()).addScaledVector(p1,-t);
+      //   return (new THREE.Vector3().addVectors(tmp01,tmp02));
+      // }
+
+
+
+      points.push( p0 );
+      points.push( p1 );
+      points.push( p2 );
+      for (let t = 0; t < 1; t+=0.1) {
+        var tmp00 = (new THREE.Vector3()).addScaledVector(p0 , Math.pow((1-t),2));
+        var tmp01 = (new THREE.Vector3()).addScaledVector(p1, 2*t*(1-t)  );
+        var tmp02 = (new THREE.Vector3()).addScaledVector(p2, t*t );
+        console.log("$t")
+        tmp00.addVectors(tmp00,tmp01);
+        tmp00.addVectors(tmp00,tmp02);
+        console.log(tmp00);
+        points.push( tmp00);
+
+      }
+
+      
+      const geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+      // Propiedades de los puntos
+      var dotMaterial = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false } );
+      var dot = new THREE.Points( geometry, dotMaterial );
+      scene.add( dot );
+
+      renderer.render( scene, camera );
+
+/*
+Aminaciones
+- se destruyen los objetos viajos
+- se construyen nuevos objetos
+*/
+// se llama infinitamente (?)
+// const animate = function () {
+//   //Aquí se llama a la funcion de animacion otra vez
+//   requestAnimationFrame( animate );
+
+  
+// };
+// animate();
+
+		</script>
+	</body>
+</html>
